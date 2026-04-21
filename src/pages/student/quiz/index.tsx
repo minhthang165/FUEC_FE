@@ -847,6 +847,7 @@ export default function QuizTest() {
         questionId: reportingQuestionId,
         reason: reportReason,
         description: reportDescription || undefined,
+        examId: examData?.examId,
       }).unwrap();
       setReportedQuestions((prev) => ({ ...prev, [reportingQuestionId]: true }));
       toast.success('Question reported successfully');
@@ -858,7 +859,7 @@ export default function QuizTest() {
       setReportReason('');
       setReportDescription('');
     }
-  }, [reportingQuestionId, reportReason, reportDescription, reportQuestion]);
+  }, [reportingQuestionId, reportReason, reportDescription, examData?.examId, reportQuestion]);
 
   const attemptFullscreen = useCallback(() => {
     try {

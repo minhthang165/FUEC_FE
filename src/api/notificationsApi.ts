@@ -8,7 +8,7 @@ export const notificationsApi = baseApi.injectEndpoints({
         method: 'DELETE',
       }),
     }),
-    reportQuestion: builder.mutation<void, { questionId: string; reason: string; description?: string }>({
+    reportQuestion: builder.mutation<void, { questionId: string; reason: string; description?: string; examId?: string }>({
       query: ({ questionId, ...body }) => ({
         url: `/Questions/${questionId}/report`,
         method: 'POST',
