@@ -22,21 +22,23 @@ export default function ExamDetailModal({ exam, isOpen, onClose }: ExamDetailMod
     useEffect(() => {
         if (!isOpen || !exam || exam.securityMode !== 2 || !exam.accessCode) return;
 
+        const duration = exam.codeDuration || 30;
+
         const handleGenerate = async () => {
             const secret = (exam.accessCode || '').split('=')[0];
-            const code = await generateTOTP(secret, 240);
+            const code = await generateTOTP(secret, duration);
             setOtpCode(code);
         };
 
         handleGenerate();
 
         const timer = setInterval(() => {
-            const second = Math.floor(Date.now() / 1000) % 240;
-            const remaining = 240 - second;
+            const second = Math.floor(Date.now() / 1000) % duration;
+            const remaining = duration - second;
             setTimeLeft(remaining);
-            setProgress((remaining / 240) * 100);
+            setProgress((remaining / duration) * 100);
 
-            if (remaining === 240) {
+            if (remaining === duration) {
                 handleGenerate();
             }
         }, 1000);

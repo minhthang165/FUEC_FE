@@ -56,13 +56,32 @@ export const examsApi = baseApi.injectEndpoints({
             },
             providesTags: ['Exams'],
         }),
-        updateExam: builder.mutation<void, UpdateExamRequest>({
+        updateExam: builder.mutation<any, UpdateExamRequest>({
             query: ({ id, ...exam }) => ({
                 url: `/Exams/${id}`,
                 method: 'PUT',
                 body: exam,
             }),
+            transformResponse: (response: any) => response?.result,
             invalidatesTags: ['Exams'],
+            async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+                try {
+                    const { data: updatedExam } = await queryFulfilled;
+                    if (updatedExam?.classSubjectId) {
+                        dispatch(
+                            examsApi.util.updateQueryData('getExamsByClassSubjectId', updatedExam.classSubjectId, (draft) => {
+                                const index = draft.items.findIndex((e: any) => e.id === id);
+                                if (index !== -1) {
+                                    // Update the existing exam in the list
+                                    draft.items[index] = { ...draft.items[index], ...updatedExam };
+                                }
+                            })
+                        );
+                    }
+                } catch (err) {
+                    console.error('Manual cache update failed:', err);
+                }
+            },
         }),
         deleteExam: builder.mutation<void, string>({
             query: (id) => ({

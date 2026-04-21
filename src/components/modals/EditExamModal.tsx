@@ -55,6 +55,7 @@ export default function EditExamModal({ exam, isOpen, onClose }: EditExamModalPr
                 startTime: values.startTime.toISOString(),
                 endTime: values.endTime.toISOString(),
                 codeDuration: 240,
+                regenerateAccessCode: exam.securityMode !== values.securityMode,
             }).unwrap();
 
             toast.success('Exam updated successfully');
