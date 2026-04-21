@@ -273,6 +273,16 @@ function TeacherCourseDetails() {
         );
     }, [examsData]);
 
+    // Sync selectedExam if exams list updates (e.g. after Edit)
+    useEffect(() => {
+        if (selectedExam) {
+            const freshExam = exams.find(e => e.id === selectedExam.id);
+            if (freshExam && JSON.stringify(freshExam) !== JSON.stringify(selectedExam)) {
+                setSelectedExam(freshExam);
+            }
+        }
+    }, [exams, selectedExam]);
+
     // Mock course data combined with real DB data if available
     const course = {
         id: courseId || 'SE1801',
