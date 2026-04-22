@@ -71,6 +71,7 @@ export const baseApi = createApi({
     'AssignmentFeedbacks',
     'StudentCheatLogs',
     'StudentSlotAnswers',
+    'QuestionReports',
   ],
   endpoints: () => ({}),
 });

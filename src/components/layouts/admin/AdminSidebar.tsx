@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router';
 import {
   LayoutDashboard, Users, BookOpen, Database, Settings,
   ChevronDown, ChevronRight, User, LogOut, PanelLeftClose, Menu, Layers,
-  Building2, GraduationCap, ClipboardList, Calendar, FileText, BookMarked, LayoutGrid
+  Building2, GraduationCap, ClipboardList, Calendar, FileText, BookMarked, LayoutGrid, Flag
 } from 'lucide-react';
 import img_fpt from '../../../assets/img_fpt.svg';
 import { useDispatch } from 'react-redux';
@@ -56,7 +56,15 @@ function AdminSidebar({ isOpen, toggleSidebar, isMobile = false }: SidebarProps)
       ]
     },
     { id: 'teachers', label: 'Teacher Management', icon: Users, path: '/admin/teachers' },
-    { id: 'database', label: 'Question Banks', icon: Database, path: '/admin/question-banks' },
+    {
+      id: 'question_banks',
+      label: 'Question Banks',
+      icon: Database,
+      subItems: [
+        { id: 'all-banks', label: 'All Banks', icon: Database, path: '/admin/question-banks' },
+        { id: 'reported-questions', label: 'Reported Questions', icon: Flag, path: '/admin/question-banks/reported-questions' }
+      ]
+    },
     {
       id: 'settings',
       label: 'Settings',
@@ -77,7 +85,7 @@ function AdminSidebar({ isOpen, toggleSidebar, isMobile = false }: SidebarProps)
       return location.pathname === item.path;
     }
     if (item.subItems) {
-      return item.subItems.some(sub => location.pathname === sub.path);
+      return item.subItems.some(sub => location.pathname === sub.path || location.pathname.startsWith(sub.path + '/'));
     }
     return false;
   };

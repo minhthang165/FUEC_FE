@@ -80,3 +80,34 @@ export interface GetAllQuestionsRequest {
     sortBy?: string;
     sortOrder?: number;
 }
+
+export interface QuestionReportDto {
+    id: string;
+    questionId: string;
+    studentId: string;
+    examId?: string;
+    reason: string;
+    description?: string;
+    studentCode?: string;
+    studentName?: string;
+    examName?: string;
+    questionContent?: string;
+    subjectName?: string;
+    subjectCode?: string;
+    createdAt?: string;
+    createdBy?: string;
+    updatedAt?: string;
+    updatedBy?: string;
+    isActive: boolean;
+}
+
+export interface GetAllQuestionReportsRequest {
+    pageNumber?: number;
+    pageSize?: number;
+    examId?: string;
+    subjectId?: string;
+    studentId?: string;
+    searchPhase?: string;
+    sortBy?: string;
+    sortOrder?: number;
+}
