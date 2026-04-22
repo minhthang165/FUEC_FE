@@ -953,20 +953,25 @@ export default function QuizTest() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
-      if (!detail?.questionId) return;
+      const qId = detail?.questionId || detail?.QuestionId;
+      if (!qId) return;
 
       setQuestions(prev =>
         prev.map(q => {
-          if (q.id !== detail.questionId) return q;
+          if (q.id !== qId) return q;
+          const newContent = detail.questionContent ?? detail.QuestionContent ?? q.questionContent;
+          const newType = detail.questionType ?? detail.QuestionType ?? q.questionType;
+          const rawOptions = detail.options ?? detail.Options;
+          
           return {
             ...q,
-            questionContent: detail.questionContent ?? q.questionContent,
-            questionType: detail.questionType ?? q.questionType,
-            options: detail.options
-              ? detail.options.map((o: any) => ({
-                  id: o.id,
-                  choiceContent: o.choiceContent,
-                  isCorrect: o.isCorrect,
+            questionContent: newContent,
+            questionType: newType,
+            options: rawOptions
+              ? rawOptions.map((o: any) => ({
+                  id: o.id || o.Id,
+                  choiceContent: o.choiceContent || o.ChoiceContent,
+                  isCorrect: o.isCorrect ?? o.IsCorrect ?? false,
                 }))
               : q.options,
           };
