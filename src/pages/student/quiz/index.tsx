@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -232,7 +232,14 @@ export default function QuizTest() {
   const [isReporting, setIsReporting] = useState(false);
   const [reportedQuestions, setReportedQuestions] = useState<Record<string, boolean>>({});
 
-  const questions: QuizQuestion[] = useMemo(() => examData?.questions || [], [examData]);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+
+  // Sync questions from examData
+  useEffect(() => {
+    if (examData?.questions) {
+      setQuestions(examData.questions);
+    }
+  }, [examData]);
 
   // --- Proctoring / Head-pose estimator refs & state ---
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -941,6 +948,35 @@ export default function QuizTest() {
       }
     }
   }, [notifications, showResults, isSubmitting, showConfirmSubmit, handleSubmit]);
+
+  // ── Real-time Question Update (admin edits question while student is taking exam) ──
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail?.questionId) return;
+
+      setQuestions(prev =>
+        prev.map(q => {
+          if (q.id !== detail.questionId) return q;
+          return {
+            ...q,
+            questionContent: detail.questionContent ?? q.questionContent,
+            questionType: detail.questionType ?? q.questionType,
+            options: detail.options
+              ? detail.options.map((o: any) => ({
+                  id: o.id,
+                  choiceContent: o.choiceContent,
+                  isCorrect: o.isCorrect,
+                }))
+              : q.options,
+          };
+        }),
+      );
+    };
+
+    window.addEventListener('signalr:question-updated', handler);
+    return () => window.removeEventListener('signalr:question-updated', handler);
+  }, []);
 
   const answeredCount = Object.keys(answers).length;
   const unansweredCount = questions.length - answeredCount;

@@ -278,6 +278,11 @@ export function useNotificationHub(
       window.dispatchEvent(new CustomEvent('signalr:student-exam-started', { detail: dto }));
     });
 
+    // ── Event: QuestionUpdated ──
+    connection.on('QuestionUpdated', (dto: any) => {
+      window.dispatchEvent(new CustomEvent('signalr:question-updated', { detail: dto }));
+    });
+
     // ── Connection lifecycle ──
     connection.onreconnecting(() => {
       console.log('[NotificationHub] Reconnecting...');

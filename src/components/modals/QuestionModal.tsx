@@ -56,8 +56,8 @@ export default function QuestionModal({ isOpen, onClose, onSave, editData }: Que
         const errs: Record<string, string> = {};
         if (!form.content.trim()) errs.content = 'Question content is required';
 
-        if (form.chapter < 1 || form.chapter > 10) {
-            errs.chapter = 'Chapter must be between 1 and 10';
+        if (form.chapter < 1) {
+            errs.chapter = 'Chapter must be at least 1';
         }
 
         const validOpts = (form.options || []).filter(o => o.trim());
@@ -148,11 +148,10 @@ export default function QuestionModal({ isOpen, onClose, onSave, editData }: Que
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Chapter * (1-10)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Chapter *</label>
                         <input
                             type="number"
                             min="1"
-                            max="10"
                             value={form.chapter}
                             onChange={e => setForm(f => ({ ...f, chapter: parseInt(e.target.value) || 0 }))}
                             className={`w-full sm:w-32 px-4 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#F37022] focus:border-transparent ${errors.chapter ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
