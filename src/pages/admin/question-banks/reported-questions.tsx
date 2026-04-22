@@ -7,6 +7,7 @@ import { Modal } from 'antd';
 import DataTable from '@/components/shared/DataTable';
 import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import QuestionModal, { type QuestionData } from '@/components/modals/QuestionModal';
+import { useNotificationHub } from '@/contexts/NotificationContext';
 import {
   useGetQuestionReportsQuery,
   useDeleteQuestionReportMutation,
@@ -41,7 +42,7 @@ function AdminReportedQuestions() {
   const [editingQuestion, setEditingQuestion] = useState<QuestionData | null>(null);
 
   // RTK Query hooks
-  const { data: reportsData, isLoading, error } = useGetQuestionReportsQuery({
+  const { data: reportsData, isLoading, error, refetch } = useGetQuestionReportsQuery({
     pageNumber: page,
     pageSize,
     searchPhase: searchTerm || undefined,
@@ -62,6 +63,24 @@ function AdminReportedQuestions() {
       toast.error('Failed to load reported questions');
     }
   }, [error]);
+
+  // Real-time synchronization
+  const { notifications } = useNotificationHub();
+
+  useEffect(() => {
+    if (notifications.length > 0) {
+      const latest = notifications[0];
+      if (latest.type === 'QuestionReport' || (latest.type as any) === 9) {
+        refetch();
+      }
+    }
+  }, [notifications, refetch]);
+
+  useEffect(() => {
+    const handler = () => refetch();
+    window.addEventListener('signalr:question-updated', handler);
+    return () => window.removeEventListener('signalr:question-updated', handler);
+  }, [refetch]);
 
   const handleViewDetail = (report: QuestionReportDto) => {
     setSelectedReport(report);
@@ -143,6 +162,7 @@ function AdminReportedQuestions() {
       setIsEditModalOpen(false);
       setEditingQuestion(null);
       setEditingQuestionId(null);
+      refetch(); // Refresh list to show updated question content
     } catch (err) {
       toast.error('Failed to update question: ' + ((err as any)?.data?.message || ''));
     }

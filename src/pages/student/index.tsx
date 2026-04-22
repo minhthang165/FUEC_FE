@@ -6,6 +6,8 @@ import {
 import { useNavigate } from 'react-router';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@/redux/authSlice';
+import { useGetStudentScheduleQuery } from '@/api/studentsApi';
+import { useGetAllStudentExamsQuery } from '@/api/studentExamsApi';
 
 function StudentDashboard() {
   const navigate = useNavigate();
@@ -20,24 +22,36 @@ function StudentDashboard() {
 
   const user = useSelector(selectCurrentUser);
 
-  const todoItems = [
-    { id: 1, title: 'Assignment 2: Database Design', course: 'DBS202', dueDate: 'Jan 11 at 11:59pm', points: 100 },
-    { id: 2, title: 'Quiz 3: JavaScript Basics', course: 'WEB301', dueDate: 'Jan 12 at 11:59pm', points: 50 },
-    { id: 3, title: 'Lab Report: ER Diagrams', course: 'DBS202', dueDate: 'Jan 13 at 5:00pm', points: 25 },
-    { id: 4, title: 'Project Proposal', course: 'SWE101', dueDate: 'Jan 15 at 11:59pm', points: 150 },
-  ];
+  const today = new Date();
+  const nextWeek = new Date();
+  nextWeek.setDate(today.getDate() + 7);
 
-  const recentFeedback = [
-    { id: 1, title: 'Assignment 1', course: 'SWE101', grade: '95/100', date: '2 days ago' },
-    { id: 2, title: 'Midterm Exam', course: 'DBS202', grade: '88/100', date: '5 days ago' },
-  ];
+  const { data: scheduleData } = useGetStudentScheduleQuery({
+    startDate: today.toISOString(),
+    endDate: nextWeek.toISOString()
+  }, { skip: !user });
 
-  const recentActivity = [
-    { courseId: '1', courseCode: 'SWE101', title: 'Important: Project deadline extended', time: '2 hours ago' },
-    { courseId: '2', courseCode: 'DBS202', title: 'Assignment 2 has been submitted', time: '5 hours ago' },
-    { courseId: '3', courseCode: 'WEB301', title: 'Quiz 2 has been graded: 45/50', time: '1 day ago' },
-    { courseId: '4', courseCode: 'MAD401', title: 'New reply in "Flutter vs React Native"', time: '2 days ago' },
-  ];
+  const { data: examsData } = useGetAllStudentExamsQuery({
+    page: 1, pageSize: 5
+  }, { skip: !user });
+
+  const scheduleItems = Array.isArray(scheduleData) ? scheduleData : [];
+  const todoItems = scheduleItems.slice(0, 4).map((slot: any, index: number) => ({
+    id: slot.id || index,
+    title: `Upcoming Class: ${slot.subjectName || slot.subjectCode || 'Lesson'}`,
+    course: slot.classCode || 'Schedule',
+    dueDate: new Date(slot.date).toLocaleDateString() + ' ' + (slot.startTime ? slot.startTime.slice(0, 5) : ''),
+  }));
+
+  const recentFeedback = (examsData?.items || []).filter((e: any) => e.isSubmitted).slice(0, 4).map((exam: any, index: number) => ({
+    id: exam.studentExamId || index,
+    title: exam.examDisplayName || 'Exam',
+    course: 'Exam', // Can map subject if available
+    grade: exam.grade !== null && exam.grade !== undefined ? `${exam.grade} pts` : 'Pending',
+    date: exam.endTime ? new Date(exam.endTime).toLocaleDateString() : 'Recently'
+  }));
+
+  const recentActivity: any[] = []; // Waiting for Notification API implementation
 
   return (
     <div className="flex animate-fadeIn">
@@ -80,7 +94,7 @@ function StudentDashboard() {
             <button className="text-xs text-[#F37022] font-semibold hover:underline">View All</button>
           </div>
           <div className="divide-y divide-gray-100">
-            {recentActivity.map((activity, index) => (
+            {recentActivity.length > 0 ? recentActivity.map((activity: any, index: number) => (
               <div key={index} className="flex items-start px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors">
                 <div className="flex-1">
                   <span className="text-xs font-semibold text-[#0066b3] bg-blue-50 px-2 py-0.5 rounded inline-block mb-1">{activity.courseCode}</span>
@@ -89,7 +103,9 @@ function StudentDashboard() {
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-300 self-center" />
               </div>
-            ))}
+            )) : (
+              <div className="p-6 text-center text-sm text-gray-500">No recent activity detected.</div>
+            )}
           </div>
         </div>
       </div>
@@ -100,7 +116,7 @@ function StudentDashboard() {
         <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
           <h2 className="text-lg font-bold text-[#1a1f36] mb-4">To Do</h2>
           <div className="space-y-4">
-            {todoItems.map((item) => {
+            {todoItems.length > 0 ? todoItems.map((item: any) => {
               const isChecked = checkedItems[item.id] || false;
               return (
                 <div key={item.id} className="flex items-start gap-3 group">
@@ -126,7 +142,9 @@ function StudentDashboard() {
                   </div>
                 </div>
               );
-            })}
+            }) : (
+              <div className="p-4 text-center text-sm text-gray-500">No upcoming tasks scheduled!</div>
+            )}
           </div>
           <button className="w-full mt-4 py-2 text-xs font-semibold text-[#F37022] bg-[#F37022]/5 hover:bg-[#F37022]/10 rounded-lg transition-colors">
             Show more
@@ -137,7 +155,7 @@ function StudentDashboard() {
         <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
           <h2 className="text-lg font-bold text-[#1a1f36] mb-4">Recent Feedback</h2>
           <div className="space-y-4">
-            {recentFeedback.map((item) => (
+            {recentFeedback.length > 0 ? recentFeedback.map((item: any) => (
               <div key={item.id} className="flex flex-col gap-1 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                 <div className="flex justify-between items-start">
                   <p className="text-sm font-bold text-[#1a1f36] truncate flex-1">{item.title}</p>
@@ -148,7 +166,9 @@ function StudentDashboard() {
                   <p className="text-[10px] text-gray-400">{item.date}</p>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-sm text-center text-gray-500 py-4">No recent feedback.</div>
+            )}
           </div>
         </div>
       </div>
