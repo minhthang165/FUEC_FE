@@ -59,8 +59,8 @@ const SMOOTHING_ALPHA = 0.25
 /* ---------- Suspicion scoring (all values in ms) ---------- */
 
 /** How fast the score rises while looking away (score += dt / RISE_MS).            *
- *  At RISE_MS = 3000 the student must look away for 3 s straight to go 0 → 1.      */
-const SUSPICION_RISE_MS = 3000
+ *  At RISE_MS = 2000 the student must look away for 2 s straight to go 0 → 1.      */
+const SUSPICION_RISE_MS = 2000
 
 /** How fast the score drops while looking at the screen (score -= dt / DECAY_MS).   *
  *  At DECAY_MS = 2500 the score drops from 1 → 0 in ~2.5 s of attentive behaviour.   */
@@ -106,6 +106,11 @@ export class HeadPoseEstimator {
 
   private gazeChw?: Float32Array
 
+  /* ---- gaze throttle ---- */
+  private gazeFrameCounter = 0
+  /** Run the ONNX model once every N frames; use cached result otherwise. */
+  private readonly GAZE_THROTTLE = 2
+
   /* ---- suspicion score ---- */
   private suspicionScore = 0
   private lastTimestamp?: number
@@ -145,7 +150,7 @@ export class HeadPoseEstimator {
 
     ort.env.wasm.wasmPaths =
       'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.2/dist/'
-    ort.env.wasm.numThreads = 1
+    ort.env.wasm.numThreads = Math.min(2, navigator.hardwareConcurrency ?? 2)
 
     this.sessions.gaze = await ort.InferenceSession.create(
       modelUrl('resnet50_gaze.onnx'),
@@ -327,6 +332,12 @@ export class HeadPoseEstimator {
     lm: Array<{ x: number; y: number }>
   ): Promise<GazePose | undefined> {
     if (!this.sessions.gaze) return
+
+    /* Return cached result on skipped frames to reduce ONNX inference load */
+    this.gazeFrameCounter++
+    if (this.gazeFrameCounter % this.GAZE_THROTTLE !== 0 && this.lastGaze) {
+      return this.lastGaze
+    }
 
     const input = await this.prepareFaceCropTensor(video, lm)
     if (!input) return
@@ -565,6 +576,7 @@ export class HeadPoseEstimator {
     this.gazeBaseline = undefined
     this.suspicionScore = 0
     this.lastTimestamp = undefined
+    this.gazeFrameCounter = 0
 
     this.ready = false
   }
