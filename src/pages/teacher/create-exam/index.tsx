@@ -295,8 +295,8 @@ function CreateExam() {
             chapterQuestionCounts: selectionMode === 'chapter' ? formData.chapterQuestionCounts : [],
             classSubjectId: courseId,
             slotId: targetSlotId || undefined,
-            startTime: new Date(formData.startTime).toISOString(),
-            endTime: new Date(formData.endTime).toISOString(),
+            startTime: formData.startTime,
+            endTime: formData.endTime,
             // Hardcode codeDuration to 240 for Dynamic Code
             codeDuration: 240,
         };
@@ -538,7 +538,7 @@ function CreateExam() {
                                 format="YYYY-MM-DD HH:mm"
                                 className="w-full h-[42px] border-gray-200 rounded-xl hover:border-[#F37022] focus:border-[#F37022]"
                                 value={form.startTime ? dayjs(form.startTime) : null}
-                                onChange={(date) => updateField('startTime', date ? date.toISOString() : '')}
+                                onChange={(date) => updateField('startTime', date ? date.format('YYYY-MM-DDTHH:mm:ss') : '')}
                                 placeholder="Select start date & time"
                             />
                         </Field>
@@ -549,7 +549,7 @@ function CreateExam() {
                                 format="YYYY-MM-DD HH:mm"
                                 className="w-full h-[42px] border-gray-200 rounded-xl hover:border-[#F37022] focus:border-[#F37022]"
                                 value={form.endTime ? dayjs(form.endTime) : null}
-                                onChange={(date) => updateField('endTime', date ? date.toISOString() : '')}
+                                onChange={(date) => updateField('endTime', date ? date.format('YYYY-MM-DDTHH:mm:ss') : '')}
                                 placeholder="Select end date & time"
                                 disabledDate={(current) => {
                                     if (!form.startTime) return false;

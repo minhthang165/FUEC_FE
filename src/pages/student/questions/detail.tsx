@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
+import dayjs from 'dayjs';
 import { useSelector } from 'react-redux';
 import {
     ChevronRight,
@@ -78,7 +79,7 @@ function QuestionDetail() {
 
         const s = slotsData.slots[index];
         const nextDate = (index + 1 < slotsData.slots.length) ? slotsData.slots[index + 1].date : null;
-        const calcEndTime = nextDate || new Date(new Date(s.date).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
+        const calcEndTime = nextDate || dayjs(s.date).add(3, 'day').format('YYYY-MM-DDTHH:mm:ss');
 
         return { ...s, calculatedEndTime: calcEndTime };
     }, [slotsData, slotId]);
@@ -204,7 +205,7 @@ function QuestionDetail() {
     // When a student has exactly 2 failed answers, the cooldown end is
     // (createdAt of the 2nd answer) + 1 hour.  We compute remaining seconds
     // from the server data so it works across page reloads and devices.
-    const parseUTC = (dateStr: string) => new Date(dateStr.endsWith('Z') ? dateStr : dateStr + 'Z');
+    const parseUTC = (dateStr: string) => dayjs(dateStr).toDate();
 
     // Cooldown: after any failed attempt, the student must wait 5 min before retrying.
     // Computed from the latest failed answer's createdAt.

@@ -147,7 +147,7 @@ export default function CreateAssignmentModal({
                 attachedFileId,
                 instanceNumber,
                 description: description.trim(),
-                dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
+                dueDate: dueDate ? dayjs(dueDate).format('YYYY-MM-DDTHH:mm:ss') : undefined,
             }).unwrap();
 
             const classCount = selectedClassSubjectIds.length;
@@ -308,7 +308,7 @@ export default function CreateAssignmentModal({
                         format="YYYY-MM-DD HH:mm"
                         className="w-full h-[42px] border-gray-300 rounded-lg hover:border-[#F37022] focus:border-[#F37022]"
                         value={dueDate ? dayjs(dueDate) : null}
-                        onChange={(date) => setDueDate(date ? date.toISOString() : '')}
+                        onChange={(date) => setDueDate(date ? date.format('YYYY-MM-DDTHH:mm:ss') : '')}
                         placeholder="Select due date & time"
                         disabled={isSubmitting}
                         disabledDate={(current) => current && current < dayjs().startOf('day')}

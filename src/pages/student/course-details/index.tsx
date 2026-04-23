@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { ArrowLeft, FileText, Calendar, ChevronDown, ChevronUp, Download, BookOpen, Lock, CheckCircle, Clock, Loader2, Play, BarChart2, Award, TrendingUp } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import dayjs from 'dayjs';
 import { selectCurrentUser } from '@/redux/authSlice';
 import { useGetClassSubjectSlotsQuery, useGetClassSubjectByIdQuery } from '@/api/classDetailsApi';
 import { useGetAssignmentsByClassSubjectIdQuery } from '@/api/assignmentsApi';
@@ -243,7 +244,7 @@ function CourseDetails() {
       id: m.id,
       title: m.fileName || m.displayName || 'Unnamed Material',
       type: m.materialType || 'Material',
-      date: new Date(m.createdDate || m.uploadedAt || Date.now()).toISOString().split('T')[0],
+      date: dayjs(m.createdDate || m.uploadedAt || undefined).format('YYYY-MM-DD'),
       downloadable: !!(m.fileUrl || m.filePath),
       fileUrl: m.fileUrl || m.filePath
     }));
@@ -297,7 +298,7 @@ function CourseDetails() {
 
     const calculatedEndTime = (i + 1 < slotsData.slots.length && slotsData.slots[i + 1].date)
       ? slotsData.slots[i + 1].date
-      : new Date(new Date(slot.date).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
+      : dayjs(slot.date).add(3, 'day').format('YYYY-MM-DDTHH:mm:ss');
 
     const now_fe = new Date();
     const start_fe = new Date(slot.date);
