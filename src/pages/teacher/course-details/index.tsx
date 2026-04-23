@@ -6,6 +6,7 @@ import {
     ChevronDown, ChevronUp, Clock, Loader2, Pencil, Trash2, Upload, BookOpen, Download, Eye
 } from 'lucide-react';
 import { Modal } from 'antd';
+import dayjs from 'dayjs';
 import {
     useGetClassSubjectByIdQuery,
     useGetClassSubjectSlotsQuery,
@@ -342,7 +343,7 @@ function TeacherCourseDetails() {
             setSlots(slotData.slots.map((s: any, i: number) => {
                 const calculatedEndTime = (i + 1 < slotData.slots.length && slotData.slots[i + 1].date)
                     ? slotData.slots[i + 1].date
-                    : new Date(new Date(s.date).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
+                    : dayjs(s.date).add(3, 'day').format('YYYY-MM-DDTHH:mm:ss');
 
                 return {
                     id: s.id,

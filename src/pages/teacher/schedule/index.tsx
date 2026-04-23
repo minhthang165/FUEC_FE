@@ -53,8 +53,8 @@ export default function TeacherSchedule() {
     }, [weekStart]);
 
     // Format dates for API query (YYYY-MM-DD)
-    const startDateStr = weekStart.toISOString().split('T')[0];
-    const endDateStr = weekEnd.toISOString().split('T')[0];
+    const startDateStr = dayjs(weekStart).format('YYYY-MM-DD');
+    const endDateStr = dayjs(weekEnd).format('YYYY-MM-DD');
 
     // Fetch schedule data for the week
     const { data: scheduleData, isFetching, error } = useGetTeacherScheduleQuery({
@@ -117,7 +117,7 @@ export default function TeacherSchedule() {
     const getScheduleItem = (date: Date, slotIndex: number) => {
         if (!scheduleData) return null;
 
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = dayjs(date).format('YYYY-MM-DD');
         const targetTime = slots.find(s => s.index === slotIndex)?.time.split(' - ')[0]; // E.g., "7:00" or "9:30"
 
         // Pad with leading zero if needed so "7:00" matches "07:00"

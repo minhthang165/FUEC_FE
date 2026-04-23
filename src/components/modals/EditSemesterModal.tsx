@@ -43,7 +43,7 @@ export default function EditSemesterModal({ semester, isOpen, onClose }: EditSem
     };
 
     const handleDateChange = (name: 'startDate' | 'endDate', date: dayjs.Dayjs | null) => {
-        setFormData((prev) => ({ ...prev, [name]: date ? date.toISOString() : '' }));
+        setFormData((prev) => ({ ...prev, [name]: date ? date.format('YYYY-MM-DDTHH:mm:ss') : '' }));
     };
 
     const handleSwitchChange = (name: 'isDefault' | 'isActive', checked: boolean) => {
