@@ -217,13 +217,14 @@ function CreateExam() {
 
     const updateChapterCount = (chapter: number, count: number) => {
         setForm(prev => {
-            const existing = prev.chapterQuestionCounts.find(c => c.chapter === chapter);
-            let nextCounts;
             if (count < 0) return prev;
 
-            // Auto-cap at max available
+            // Auto-cap at max available questions for this chapter
             const maxAvailable = getMaxQuestionsForChapter(chapter);
             const cappedCount = Math.min(count, maxAvailable);
+
+            const existing = prev.chapterQuestionCounts.find(c => c.chapter === chapter);
+            let nextCounts;
 
             if (cappedCount === 0) {
                 nextCounts = prev.chapterQuestionCounts.filter(c => c.chapter !== chapter);
@@ -489,25 +490,36 @@ function CreateExam() {
                                 {availableChapters.map(ch => {
                                     const count = form.chapterQuestionCounts.find(c => c.chapter === ch)?.count || 0;
                                     const maxAvailable = getMaxQuestionsForChapter(ch);
+                                    const inputId = `chapter-input-${ch}`;
+
                                     return (
-                                        <div key={ch} className={`p-3 rounded-xl border transition-all ${count > 0 ? 'border-[#F37022] bg-orange-50/30' : 'border-gray-100 bg-gray-50/50'}`}>
+                                        <div
+                                            key={ch}
+                                            className={`p-3 rounded-xl border transition-all cursor-pointer group ${count > 0 ? 'border-[#F37022] bg-orange-50/30' : 'border-gray-100 bg-gray-50/50 hover:border-gray-200'}`}
+                                            onClick={() => document.getElementById(inputId)?.focus()}
+                                        >
                                             <div className="text-xs font-bold text-[#0A1B3C] mb-1.5 flex items-center justify-between">
                                                 <span>Ch. {ch}</span>
                                                 {ch > currentChapterProgress && <span className="text-[10px] text-orange-600 bg-orange-100 px-1 rounded">Extra</span>}
                                             </div>
-                                            <div className={`flex items-center justify-center bg-white border rounded-lg py-1.5 px-2 focus-within:ring-1 focus-within:ring-[#F37022] focus-within:border-transparent transition-all ${maxAvailable === 0 ? 'border-red-200' : 'border-gray-200'
-                                                }`}>
+                                            <div className={`grid grid-cols-2 items-center bg-white border rounded-lg py-1.5 focus-within:ring-1 focus-within:ring-[#F37022] focus-within:border-transparent transition-all ${maxAvailable === 0 ? 'border-red-200' : 'border-gray-200'}`}>
                                                 <input
+                                                    id={inputId}
                                                     type="number"
                                                     min="0"
                                                     max={maxAvailable}
                                                     value={count || ''}
-                                                    onChange={e => updateChapterCount(ch, parseInt(e.target.value) || 0)}
-                                                    className="w-2 bg-transparent text-sm text-right focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                    onChange={e => {
+                                                        const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                                                        if (!isNaN(val)) updateChapterCount(ch, val);
+                                                    }}
+                                                    onFocus={(e) => e.target.select()}
+                                                    className="w-full bg-transparent text-sm font-semibold text-gray-700 text-right pr-[1px] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                     placeholder="0"
                                                 />
-                                                <span className={`text-sm font-medium ${maxAvailable === 0 ? 'text-red-400' : count >= maxAvailable ? 'text-orange-500' : 'text-gray-400'
-                                                    }`}>/{maxAvailable}</span>
+                                                <span className={`text-sm font-medium text-left pl-[1px] whitespace-nowrap ${maxAvailable === 0 ? 'text-red-400' : count >= maxAvailable ? 'text-orange-500' : 'text-gray-400'}`}>
+                                                    /{maxAvailable}
+                                                </span>
                                             </div>
                                         </div>
                                     );
