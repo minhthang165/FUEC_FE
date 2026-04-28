@@ -550,7 +550,7 @@ function CreateExam() {
                                 format="YYYY-MM-DD HH:mm"
                                 className="w-full h-[42px] border-gray-200 rounded-xl hover:border-[#F37022] focus:border-[#F37022]"
                                 value={form.startTime ? dayjs(form.startTime) : null}
-                                onChange={(date) => updateField('startTime', date ? date.format('YYYY-MM-DDTHH:mm:ss') : '')}
+                                onChange={(date) => updateField('startTime', date ? date.toISOString() : '')}
                                 placeholder="Select start date & time"
                             />
                         </Field>
@@ -561,7 +561,7 @@ function CreateExam() {
                                 format="YYYY-MM-DD HH:mm"
                                 className="w-full h-[42px] border-gray-200 rounded-xl hover:border-[#F37022] focus:border-[#F37022]"
                                 value={form.endTime ? dayjs(form.endTime) : null}
-                                onChange={(date) => updateField('endTime', date ? date.format('YYYY-MM-DDTHH:mm:ss') : '')}
+                                onChange={(date) => updateField('endTime', date ? date.toISOString() : '')}
                                 placeholder="Select end date & time"
                                 disabledDate={(current) => {
                                     if (!form.startTime) return false;
