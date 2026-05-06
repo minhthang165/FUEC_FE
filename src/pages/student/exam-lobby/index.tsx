@@ -12,16 +12,9 @@ const SecurityMode = {
   DynamicCode: 2,
 } as const;
 
-function toUTC(dateStr: string): Date {
-  if (!dateStr.endsWith('Z') && !/[+\-]\d{2}:\d{2}$/.test(dateStr)) {
-    return new Date(dateStr + 'Z');
-  }
-  return new Date(dateStr);
-}
-
 function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '---';
-  const date = toUTC(iso);
+  const date = new Date(iso);
   if (isNaN(date.getTime())) return '---';
   return date.toLocaleString('en-US', {
     day: '2-digit', month: '2-digit', year: 'numeric',
@@ -31,13 +24,13 @@ function formatDateTime(iso: string | null | undefined): string {
 
 function getExamStatus(startTime: string, endTime: string): 'upcoming' | 'available' | 'ended' {
   const now = Date.now();
-  if (now < toUTC(startTime).getTime()) return 'upcoming';
-  if (now > toUTC(endTime).getTime()) return 'ended';
+  if (now < new Date(startTime).getTime()) return 'upcoming';
+  if (now > new Date(endTime).getTime()) return 'ended';
   return 'available';
 }
 
 function getCountdown(targetTime: string): string {
-  const diff = toUTC(targetTime).getTime() - Date.now();
+  const diff = new Date(targetTime).getTime() - Date.now();
   if (diff <= 0) return '00:00:00';
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
